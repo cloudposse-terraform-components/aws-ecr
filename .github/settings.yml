@@ -5,5 +5,3 @@ repository:
   description: This component is responsible for provisioning repositories, lifecycle rules, and permissions for streamlined ECR usage
   homepage: https://cloudposse.com/accelerate
   topics: terraform, terraform-component
-
-
