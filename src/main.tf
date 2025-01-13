@@ -15,7 +15,7 @@ module "readonly_access" {
 }
 
 locals {
-  ecr_user_arn = join("", aws_iam_user.ecr.*.arn)
+  ecr_user_arn = join("", aws_iam_user.ecr[*].arn)
 }
 
 module "ecr" {
