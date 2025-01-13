@@ -14,16 +14,16 @@ output "ecr_repo_url_map" {
 }
 
 output "ecr_user_name" {
-  value       = join("", aws_iam_user.ecr.*.name)
+  value       = join("", aws_iam_user.ecr[*].name)
   description = "ECR user name"
 }
 
 output "ecr_user_arn" {
-  value       = join("", aws_iam_user.ecr.*.arn)
+  value       = join("", aws_iam_user.ecr[*].arn)
   description = "ECR user ARN"
 }
 
 output "ecr_user_unique_id" {
-  value       = join("", aws_iam_user.ecr.*.unique_id)
+  value       = join("", aws_iam_user.ecr[*].unique_id)
   description = "ECR user unique ID assigned by AWS"
 }

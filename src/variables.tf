@@ -58,3 +58,12 @@ variable "principals_lambda" {
   description = "Principal account IDs of Lambdas allowed to consume ECR"
   default     = []
 }
+
+variable "pull_through_cache_rules" {
+  type = map(object({
+    registry = string
+    secret   = optional(string, "")
+  }))
+  description = "Map of pull through cache rules to configure"
+  default     = {}
+}
