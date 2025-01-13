@@ -36,6 +36,9 @@ aws-assumed-role/
 **/.module/
 **/.helmfile/
 
+# We pull account-map from a remote repository in Github Actions
+# However, we want to locally to validate tflint
+account-map/
 
 # Draft or auto-saved version
 # Note that the leading "**/" appears necessary for Docker even if not for Git

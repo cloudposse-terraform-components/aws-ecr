@@ -1,3 +1,7 @@
+locals {
+  enabled = module.this.enabled
+}
+
 module "full_access" {
   source = "../account-map/modules/roles-to-principals"
 
@@ -34,4 +38,22 @@ module "ecr" {
   use_fullname               = false
 
   context = module.this.context
+}
+
+data "aws_secretsmanager_secret" "cache_credentials" {
+  for_each = local.enabled ? {
+    for key, rule in var.pull_through_cache_rules :
+    key => rule.secret
+    if length(rule.secret) > 0
+  } : {}
+
+  name = each.value
+}
+
+resource "aws_ecr_pull_through_cache_rule" "this" {
+  for_each = local.enabled ? var.pull_through_cache_rules : {}
+
+  ecr_repository_prefix = each.key
+  upstream_registry_url = each.value.registry
+  credential_arn        = length(each.value.secret) > 0 ? data.aws_secretsmanager_secret.cache_credentials[each.key].arn : null
 }

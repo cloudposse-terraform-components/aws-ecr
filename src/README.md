@@ -58,6 +58,23 @@ components:
           stage: ["*"]
 ```
 
+### Pull Through Cache
+
+To configure a pull through cache rule, you can use the `pull_through_cache_rules` input. Each rule requires a AWS Secrets Manager secret, by name, to be provided. The secret should contain the credentials to access the registry. The `registry` field is the registry to apply the rule to and is specific to the registry. For Docker Hub, the registry is `registry-1.docker.io`.
+
+```yaml
+components:
+  terraform:
+    ecr:
+      vars:
+        enabled: true
+...
+        pull_through_cache_rules:
+          dockerhub:
+            registry: "registry-1.docker.io"
+            secret: "ecr-pullthroughcache/dockerhub"
+```
+
 <!-- prettier-ignore-start -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -87,10 +104,12 @@ components:
 
 | Name | Type |
 |------|------|
+| [aws_ecr_pull_through_cache_rule.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_pull_through_cache_rule) | resource |
 | [aws_iam_policy.ecr_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_user.ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
 | [aws_iam_user_policy_attachment.ecr_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user_policy_attachment) | resource |
 | [aws_iam_policy_document.ecr_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_secretsmanager_secret.cache_credentials](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret) | data source |
 
 ## Inputs
 
@@ -117,6 +136,7 @@ components:
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | ID element. Usually an abbreviation of your organization name, e.g. 'eg' or 'cp', to help ensure generated IDs are globally unique | `string` | `null` | no |
 | <a name="input_principals_lambda"></a> [principals\_lambda](#input\_principals\_lambda) | Principal account IDs of Lambdas allowed to consume ECR | `list(string)` | `[]` | no |
 | <a name="input_protected_tags"></a> [protected\_tags](#input\_protected\_tags) | Tags to refrain from deleting | `list(string)` | `[]` | no |
+| <a name="input_pull_through_cache_rules"></a> [pull\_through\_cache\_rules](#input\_pull\_through\_cache\_rules) | Map of pull through cache rules to configure | <pre>map(object({<br/>    registry = string<br/>    secret   = optional(string, "")<br/>  }))</pre> | `{}` | no |
 | <a name="input_read_only_account_role_map"></a> [read\_only\_account\_role\_map](#input\_read\_only\_account\_role\_map) | Map of `account:[role, role...]` for read-only access. Use `*` for role to grant access to entire account | `map(list(string))` | `{}` | no |
 | <a name="input_read_write_account_role_map"></a> [read\_write\_account\_role\_map](#input\_read\_write\_account\_role\_map) | Map of `account:[role, role...]` for write access. Use `*` for role to grant access to entire account | `map(list(string))` | n/a | yes |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Terraform regular expression (regex) string.<br/>Characters matching the regex will be removed from the ID elements.<br/>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
