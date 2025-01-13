@@ -58,6 +58,23 @@ components:
           stage: ["*"]
 ```
 
+### Pull Through Cache
+
+To configure a pull through cache rule, you can use the `pull_through_cache_rules` input. Each rule requires a AWS Secrets Manager secret, by name, to be provided. The secret should contain the credentials to access the registry. The `registry` field is the registry to apply the rule to and is specific to the registry. For Docker Hub, the registry is `registry-1.docker.io`.
+
+```yaml
+components:
+  terraform:
+    ecr:
+      vars:
+        enabled: true
+...
+        pull_through_cache_rules:
+          dockerhub:
+            registry: "registry-1.docker.io"
+            secret: "ecr-pullthroughcache/dockerhub"
+```
+
 <!-- prettier-ignore-start -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
