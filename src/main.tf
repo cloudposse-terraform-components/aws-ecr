@@ -36,7 +36,7 @@ module "ecr" {
   principals_lambda          = var.principals_lambda
   scan_images_on_push        = var.scan_images_on_push
   use_fullname               = false
-  replication_configurations  = var.replication_configurations
+  replication_configurations = var.replication_configurations
 
   context = module.this.context
 }
