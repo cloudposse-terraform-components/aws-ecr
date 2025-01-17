@@ -67,3 +67,20 @@ variable "pull_through_cache_rules" {
   description = "Map of pull through cache rules to configure"
   default     = {}
 }
+
+variable "replication_configurations" {
+  type = list(object({
+    rules = list(object({
+      destinations = list(object({
+        region      = string
+        registry_id = string
+      }))
+      repository_filters = list(object({
+        filter      = string
+        filter_type = string
+      }))
+    }))
+  }))
+  description = "Replication configuration for a registry. See [Replication Configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_replication_configuration#replication-configuration)."
+  default     = []
+}
