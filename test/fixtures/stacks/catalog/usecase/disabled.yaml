@@ -1,9 +1,10 @@
 components:
   terraform:
-    ecr/basic:
+    ecr/disabled:
       metadata:
         component: target
       vars:
+        enabled: false
         # Set `ecr_user_enabled: true` when this issue would be resolved
         # https://github.com/cloudposse-terraform-components/aws-ecr/issues/18
         ecr_user_enabled: false

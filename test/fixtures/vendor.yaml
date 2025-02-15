@@ -16,14 +16,3 @@ spec:
         - "**/*.tftmpl"
         - "**/modules/**"
       excluded_paths: []
-
-    - component: "ecr"
-      source: "../../src"
-      targets:
-        - "components/terraform/ecr"
-      included_paths:
-        - "**/*.tf"
-        - "**/*.md"
-        - "**/*.tftmpl"
-        - "**/modules/**"
-      excluded_paths: []

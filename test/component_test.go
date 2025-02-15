@@ -6,115 +6,126 @@ import (
 	"testing"
 
 	"github.com/cloudposse/test-helpers/pkg/atmos"
-	helper "github.com/cloudposse/test-helpers/pkg/atmos/aws-component-helper"
+	helper "github.com/cloudposse/test-helpers/pkg/atmos/component-helper"
 	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/stretchr/testify/assert"
 )
 
 type LifecyclePolicyRuleSelection struct {
-	TagStatus     string   `json:"tagStatus"`
-	TagPrefixList []string `json:"tagPrefixList"`
-	CountType     string   `json:"countType"`
-	CountNumber   int      `json:"countNumber"`
+    TagStatus     string   `json:"tagStatus"`
+    TagPrefixList []string `json:"tagPrefixList"`
+    CountType     string   `json:"countType"`
+    CountNumber   int      `json:"countNumber"`
 }
+
 type LifecyclePolicyRule struct {
 	RulePriority int                          `json:"rulePriority"`
 	Description  string                       `json:"description"`
 	Selection    LifecyclePolicyRuleSelection `json:"selection"`
 	Action       map[string]string            `json:"action"`
 }
+
 type LifecyclePolicy struct {
-	Rules []LifecyclePolicyRule `json:"rules"`
+    Rules []LifecyclePolicyRule `json:"rules"`
 }
 
-func TestComponent(t *testing.T) {
-	awsRegion := "us-east-2"
+type ComponentSuite struct {
+	helper.TestSuite
+}
 
-	fixture := helper.NewFixture(t, "../", awsRegion, "test/fixtures")
+func (s *ComponentSuite) TestBasic() {
+	const component = "ecr/basic"
+	const stack = "default-test"
+	const awsRegion = "us-east-2"
 
-	defer fixture.TearDown()
-	fixture.SetUp(&atmos.Options{})
+	defer s.DestroyAtmosComponent(s.T(), component, stack, nil)
+	options, _ := s.DeployAtmosComponent(s.T(), component, stack, nil)
+	assert.NotNil(s.T(), options)
 
-	fixture.Suite("default", func(t *testing.T, suite *helper.Suite) {
-		suite.Test(t, "basic", func(t *testing.T, atm *helper.Atmos) {
-			defer atm.GetAndDestroy("ecr/basic", "default-test", map[string]interface{}{})
-			component := atm.GetAndDeploy("ecr/basic", "default-test", map[string]interface{}{})
-			assert.NotNil(t, component)
+	awsAccountId := aws.GetAccountId(s.T())
 
-			repositoryHost := atm.Output(component, "repository_host")
-			assert.Equal(t, fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", fixture.AwsAccountId, awsRegion), repositoryHost)
+	repositoryHost := atmos.Output(s.T(), options, "repository_host")
+	assert.Equal(s.T(), fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com", awsAccountId, awsRegion), repositoryHost)
 
-			ecrUserName := atm.Output(component, "ecr_user_name")
-			assert.Empty(t, ecrUserName)
+	assert.Empty(s.T(), atmos.Output(s.T(), options, "ecr_user_name"))
+	assert.Empty(s.T(), atmos.Output(s.T(), options, "ecr_user_arn"))
+	assert.Empty(s.T(), atmos.Output(s.T(), options, "ecr_user_unique_id"))
 
-			ecrUserArn := atm.Output(component, "ecr_user_arn")
-			assert.Empty(t, ecrUserArn)
+	arnMaps := map[string]string{}
+	atmos.OutputStruct(s.T(), options, "ecr_repo_arn_map", &arnMaps)
 
-			ecrUserUniqueId := atm.Output(component, "ecr_user_unique_id")
-			assert.Empty(t, ecrUserUniqueId)
+	urlMaps := map[string]string{}
+	atmos.OutputStruct(s.T(), options, "ecr_repo_url_map", &urlMaps)
 
-			arnMaps := map[string]string{}
-			atm.OutputStruct(component, "ecr_repo_arn_map", &arnMaps)
+	for name, arn := range arnMaps {
+		repository := aws.GetECRRepo(s.T(), awsRegion, name)
+		assert.Equal(s.T(), name, *repository.RepositoryName)
+		assert.Equal(s.T(), arn, *repository.RepositoryArn)
+		assert.Equal(s.T(), urlMaps[name], *repository.RepositoryUri)
+		assert.EqualValues(s.T(), "IMMUTABLE", repository.ImageTagMutability)
+		assert.True(s.T(), repository.ImageScanningConfiguration.ScanOnPush)
+		assert.EqualValues(s.T(), "AES256", repository.EncryptionConfiguration.EncryptionType)
 
-			urlMaps := map[string]string{}
-			atm.OutputStruct(component, "ecr_repo_url_map", &urlMaps)
+		lifecyclePolicyString := aws.GetECRRepoLifecyclePolicy(s.T(), awsRegion, repository)
+		lifecyclePolicy := LifecyclePolicy{}
+		json.Unmarshal([]byte(lifecyclePolicyString), &lifecyclePolicy)
 
-			for name, arn := range arnMaps {
-				repository := aws.GetECRRepo(t, awsRegion, name)
-				assert.Equal(t, name, *repository.RepositoryName)
-				assert.Equal(t, arn, *repository.RepositoryArn)
-				assert.Equal(t, urlMaps[name], *repository.RepositoryUri)
-				assert.EqualValues(t, "IMMUTABLE", repository.ImageTagMutability)
-				assert.True(t, repository.ImageScanningConfiguration.ScanOnPush)
-				assert.EqualValues(t, "AES256", repository.EncryptionConfiguration.EncryptionType)
-
-				lifecyclePolicyString := aws.GetECRRepoLifecyclePolicy(t, awsRegion, repository)
-				lifecyclePolicy := LifecyclePolicy{}
-				json.Unmarshal([]byte(lifecyclePolicyString), &lifecyclePolicy)
-
-				expectedLifecyclePolicy := LifecyclePolicy{
-					Rules: []LifecyclePolicyRule{
-						{
-							RulePriority: 1,
-							Description:  "Protects images tagged with prod",
-							Selection: LifecyclePolicyRuleSelection{
-								TagStatus:     "tagged",
-								TagPrefixList: []string{"prod"},
-								CountType:     "imageCountMoreThan",
-								CountNumber:   999999,
-							},
-							Action: map[string]string{
-								"type": "expire",
-							},
-						},
-						{
-							RulePriority: 2,
-							Description:  "Remove untagged images",
-							Selection: LifecyclePolicyRuleSelection{
-								TagStatus:   "untagged",
-								CountType:   "imageCountMoreThan",
-								CountNumber: 1,
-							},
-							Action: map[string]string{
-								"type": "expire",
-							},
-						},
-						{
-							RulePriority: 3,
-							Description:  "Rotate images when reach 500 images stored",
-							Selection: LifecyclePolicyRuleSelection{
-								TagStatus:   "any",
-								CountType:   "imageCountMoreThan",
-								CountNumber: 500,
-							},
-							Action: map[string]string{
-								"type": "expire",
-							},
-						},
+		expectedLifecyclePolicy := LifecyclePolicy{
+			Rules: []LifecyclePolicyRule{
+				{
+					RulePriority: 1,
+					Description:  "Protects images tagged with prod",
+					Selection: LifecyclePolicyRuleSelection{
+						TagStatus:     "tagged",
+						TagPrefixList: []string{"prod"},
+						CountType:     "imageCountMoreThan",
+						CountNumber:   999999,
 					},
-				}
-				assert.EqualValues(t, expectedLifecyclePolicy, lifecyclePolicy)
-			}
-		})
-	})
+					Action: map[string]string{
+						"type": "expire",
+					},
+				},
+				{
+					RulePriority: 2,
+					Description:  "Remove untagged images",
+					Selection: LifecyclePolicyRuleSelection{
+						TagStatus:   "untagged",
+						CountType:   "imageCountMoreThan",
+						CountNumber: 1,
+					},
+					Action: map[string]string{
+						"type": "expire",
+					},
+				},
+				{
+					RulePriority: 3,
+					Description:  "Rotate images when reach 500 images stored",
+					Selection: LifecyclePolicyRuleSelection{
+						TagStatus:   "any",
+						CountType:   "imageCountMoreThan",
+						CountNumber: 500,
+					},
+					Action: map[string]string{
+						"type": "expire",
+					},
+				},
+			},
+		}
+		assert.EqualValues(s.T(), expectedLifecyclePolicy, lifecyclePolicy)
+	}
+
+	s.DriftTest(component, stack, nil)
+}
+
+func (s *ComponentSuite) TestEnabledFlag() {
+	const component = "ecr/disabled"
+	const stack = "default-test"
+	const awsRegion = "us-east-2"
+
+	s.VerifyEnabledFlag(component, stack, nil)
+}
+
+func TestRunSuite(t *testing.T) {
+	suite := new(ComponentSuite)
+	helper.Run(t, suite)
 }

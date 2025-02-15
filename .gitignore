@@ -19,7 +19,7 @@ aws-assumed-role/
 **/nohup.out
 **/*.tfstate
 **/*.tfstate.*
-**/planfile
+**/planfilecd
 **/*.planfile
 **/*.kubeconfig
 **/.terraform.lock.hcl
