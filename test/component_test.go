@@ -38,6 +38,17 @@ func (s *ComponentSuite) TestBasic() {
 	const stack = "default-test"
 	const awsRegion = "us-east-2"
 
+	suffix := strings.ToLower(random.UniqueId())
+
+	inputs := map[string]interface{}{
+		"images" : []string{
+			fmt.Sprintf("infrastructure-%s", suffix),
+			fmt.Sprintf("microservice-a-%s", suffix),
+			fmt.Sprintf("microservice-b-%s", suffix),
+			fmt.Sprintf("microservice-c-%s", suffix),
+		},
+	}
+
 	defer s.DestroyAtmosComponent(s.T(), component, stack, nil)
 	options, _ := s.DeployAtmosComponent(s.T(), component, stack, nil)
 	assert.NotNil(s.T(), options)
