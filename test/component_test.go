@@ -127,7 +127,7 @@ func (s *ComponentSuite) TestBasic() {
 		assert.EqualValues(s.T(), expectedLifecyclePolicy, lifecyclePolicy)
 	}
 
-	s.DriftTest(component, stack, nil)
+	s.DriftTest(component, stack, &inputs)
 }
 
 func (s *ComponentSuite) TestEnabledFlag() {
