@@ -24,7 +24,7 @@ locals {
 
 module "ecr" {
   source  = "cloudposse/ecr/aws"
-  version = "0.36.0"
+  version = "0.41.0"
 
   protected_tags             = var.protected_tags
   enable_lifecycle_policy    = var.enable_lifecycle_policy
@@ -36,6 +36,7 @@ module "ecr" {
   principals_lambda          = var.principals_lambda
   scan_images_on_push        = var.scan_images_on_push
   use_fullname               = false
+  replication_configurations = var.replication_configurations
 
   context = module.this.context
 }
