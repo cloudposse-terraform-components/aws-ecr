@@ -31,12 +31,17 @@ This component is responsible for provisioning repositories, lifecycle rules, an
 This utilizes
 [the roles-to-principals submodule](https://github.com/cloudposse/terraform-aws-components/tree/main/modules/account-map/modules/roles-to-principals)
 to assign accounts to various roles. It is also compatible with the
-[GitHub Actions IAM Role mixin](https://github.com/cloudposse/terraform-aws-components/blob/master/mixins/github-actions-iam-role/README-github-action-iam-role.md).
+[GitHub Actions IAM Role mixin](https://github.com/cloudposse-terraform-components/mixins/blob/main/src/mixins/github-actions-iam-role/README-github-action-iam-role.md).
+
+<details>
+  <summary>Warning (Older) regarding <code>eks-iam</code> component </summary>
 
 > [!WARNING]
 >
 > Older versions of our reference architecture have an`eks-iam` component that needs to be updated to provide sufficient
 > IAM roles to allow pods to pull from ECR repos
+
+</details>
 
 ## Usage
 
