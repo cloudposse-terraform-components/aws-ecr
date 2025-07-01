@@ -87,7 +87,7 @@ func (s *ComponentSuite) TestBasic() {
 			Rules: []LifecyclePolicyRule{
 				{
 					RulePriority: 1,
-					Description:  "Protects images tagged with prod",
+					Description:  "Protects images tagged with prefix prod",
 					Selection: LifecyclePolicyRuleSelection{
 						TagStatus:     "tagged",
 						TagPrefixList: []string{"prod"},
