@@ -6,6 +6,7 @@ variable "imports" {
   type = object({
     repository = bool
   })
+  description = "Import configuration for the ECR component."
   default = {
     repository = false
   }
