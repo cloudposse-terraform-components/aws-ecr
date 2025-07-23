@@ -3,11 +3,17 @@ name: "aws-ecr"
 github_repo: "cloudposse-terraform-components/aws-ecr"
 # Short description of this project
 description: |-
-  This component is responsible for provisioning repositories, lifecycle rules, and permissions for streamlined ECR usage.
+  This component is responsible for provisioning an ECR repository, it's lifecycle rules, and permissions for streamlined ECR usage.
   This utilizes
   [the roles-to-principals submodule](https://github.com/cloudposse/terraform-aws-components/tree/main/modules/account-map/modules/roles-to-principals)
   to assign accounts to various roles. It is also compatible with the
   [GitHub Actions IAM Role mixin](https://github.com/cloudposse-terraform-components/mixins/blob/main/src/mixins/github-actions-iam-role/README-github-action-iam-role.md).
+
+  > [!WARNING]
+  > 
+  > This component has had a major release and requires work to upgrade to the latest release.
+  > Please see the [CHANGELOG](CHANGELOG.md) for more information.
+
 
   <details>
     <summary>Warning (Older) regarding <code>eks-iam</code> component </summary>
@@ -29,34 +35,53 @@ description: |-
   region.
 
   ```yaml
+  # catalog/ecr/defaults.yaml
   components:
     terraform:
-      ecr:
+      ecr/defaults:
         vars:
+          enabled: true
           ecr_user_enabled: false
-          enable_lifecycle_policy: true
-          max_image_count: 500
           scan_images_on_push: true
-          protected_tags:
-            - prod
-          image_tag_mutability: MUTABLE
-
-          images:
-            - infrastructure
-            - microservice-a
-            - microservice-b
-            - microservice-c
-          read_write_account_role_map:
-            identity:
-              - admin
-              - cicd
-            automation:
-              - admin
+          # github_actions_iam_role_enabled: true
+          # github_actions_iam_role_attributes: [ "ecr" ]
+          # github_actions_allowed_repos:
+          #   - ACME_ORG/acme-repo
+          #   - ACME_ORG/*
           read_only_account_role_map:
-            corp: ["*"]
-            dev: ["*"]
-            prod: ["*"]
-            stage: ["*"]
+            plat-dev: ["*"]
+            plat-sandbox: ["*"]
+            plat-staging: ["*"]
+            plat-prod: ["*"]
+          read_write_account_role_map:
+            core-identity:
+              - devops
+              - developers
+            core-auto:
+              - admin
+              - poweruser
+  ```
+  Instances of the component can then be created via
+  ```yaml
+  # catalog/ecr/app-on-ecs.yaml
+  imports:
+    - catalog/ecr/defaults
+  components:
+    terraform:
+      ecr/repositories/app-on-ecs:
+        metadata:
+          component: ecr
+          inherits:
+            - ecr/defaults
+        vars:
+          repository_name: ACME_ORG/app-on-ecs
+          name: ecr-app-on-ecs
+  ```
+  You can then import multiple catalog ECR entries via
+  ```yaml
+  # orgs/acme/core/us-east-2/artifacts.yaml
+  imports:
+    - catalog/ecr/*
   ```
 
   <!-- prettier-ignore-start -->

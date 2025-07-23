@@ -30,32 +30,28 @@ region.
 ```yaml
 components:
   terraform:
-    ecr:
+    ecr/defaults:
       vars:
+        enabled: true
         ecr_user_enabled: false
-        enable_lifecycle_policy: true
-        max_image_count: 500
         scan_images_on_push: true
-        protected_tags:
-          - prod
-        image_tag_mutability: MUTABLE
-
-        images:
-          - infrastructure
-          - microservice-a
-          - microservice-b
-          - microservice-c
-        read_write_account_role_map:
-          identity:
-            - admin
-            - cicd
-          automation:
-            - admin
+        github_actions_iam_role_enabled: true
+        github_actions_iam_role_attributes: ["ecr"]
+        github_actions_allowed_repos:
+          - ACME_ORG/acme-repo
+          - ACME_ORG/*
         read_only_account_role_map:
-          corp: ["*"]
-          dev: ["*"]
-          prod: ["*"]
-          stage: ["*"]
+          plat-dev: ["*"]
+          plat-sandbox: ["*"]
+          plat-staging: ["*"]
+          plat-prod: ["*"]
+        read_write_account_role_map:
+          core-identity:
+            - devops
+            - developers
+          core-auto:
+            - admin
+            - poweruser
 ```
 
 ### Pull Through Cache
@@ -68,11 +64,11 @@ components:
     ecr:
       vars:
         enabled: true
-...
-        pull_through_cache_rules:
-          dockerhub:
-            registry: "registry-1.docker.io"
-            secret: "ecr-pullthroughcache/dockerhub"
+---
+pull_through_cache_rules:
+  dockerhub:
+    registry: "registry-1.docker.io"
+    secret: "ecr-pullthroughcache/dockerhub"
 ```
 
 <!-- prettier-ignore-start -->
@@ -82,19 +78,19 @@ components:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.9.0, < 6.0.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.9.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.9.0, < 6.0.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.9.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_ecr"></a> [ecr](#module\_ecr) | cloudposse/ecr/aws | 0.42.1 |
+| <a name="module_ecr"></a> [ecr](#module\_ecr) | cloudposse/ecr/aws | 0.41.0 |
 | <a name="module_full_access"></a> [full\_access](#module\_full\_access) | ../account-map/modules/roles-to-principals | n/a |
 | <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | ../account-map/modules/iam-roles | n/a |
 | <a name="module_readonly_access"></a> [readonly\_access](#module\_readonly\_access) | ../account-map/modules/roles-to-principals | n/a |

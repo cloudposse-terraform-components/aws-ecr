@@ -1,7 +1,7 @@
 locals {
   github_actions_iam_policy = data.aws_iam_policy_document.github_actions_iam_policy.json
-  ecr_resources_static      = [for k, v in module.ecr.repository_arn_map : v]
-  ecr_resources_wildcard    = [for k, v in module.ecr.repository_arn_map : "${v}/*"]
+  ecr_resources_static      = [module.ecr.repository_arn]
+  ecr_resources_wildcard    = ["${module.ecr.repository_arn}/*"]
   resources                 = concat(local.ecr_resources_static, local.ecr_resources_wildcard)
 }
 

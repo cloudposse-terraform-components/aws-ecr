@@ -23,20 +23,20 @@ locals {
 }
 
 module "ecr" {
-  source  = "cloudposse/ecr/aws"
-  version = "0.42.1"
 
-  protected_tags             = var.protected_tags
-  enable_lifecycle_policy    = var.enable_lifecycle_policy
-  image_names                = var.images
-  image_tag_mutability       = var.image_tag_mutability
-  max_image_count            = var.max_image_count
+  source  = "cloudposse/ecr/aws"
+  version = "1.0.0"
+
+  repository_name = var.repository_name
+
   principals_full_access     = compact(concat(module.full_access.principals, [local.ecr_user_arn]))
   principals_readonly_access = module.readonly_access.principals
   principals_lambda          = var.principals_lambda
   scan_images_on_push        = var.scan_images_on_push
-  use_fullname               = false
+  force_delete               = var.force_delete
+
   replication_configurations = var.replication_configurations
+  lifecycle_rules            = var.lifecycle_rules
 
   context = module.this.context
 }

@@ -3,21 +3,12 @@ variable "region" {
   description = "AWS Region"
 }
 
-variable "images" {
-  type        = list(string)
-  description = "List of image names (ECR repo names) to create repos for"
-}
-
-variable "image_tag_mutability" {
+variable "repository_name" {
   type        = string
-  description = "The tag mutability setting for the repository. Must be one of: `MUTABLE` or `IMMUTABLE`"
-  default     = "MUTABLE"
+  description = "Name of the ECR repository to create"
 }
 
-variable "max_image_count" {
-  type        = number
-  description = "Max number of images to store. Old ones will be deleted to make room for new ones."
-}
+
 
 variable "read_write_account_role_map" {
   type        = map(list(string))
@@ -42,21 +33,16 @@ variable "scan_images_on_push" {
   default     = false
 }
 
-variable "protected_tags" {
-  type        = list(string)
-  description = "Tags to refrain from deleting"
-  default     = []
-}
-
-variable "enable_lifecycle_policy" {
-  type        = bool
-  description = "Enable/disable image lifecycle policy"
-}
-
 variable "principals_lambda" {
   type        = list(string)
   description = "Principal account IDs of Lambdas allowed to consume ECR"
   default     = []
+}
+
+variable "force_delete" {
+  type        = bool
+  description = "Whether to delete the repository even if it contains images"
+  default     = null
 }
 
 variable "pull_through_cache_rules" {
@@ -83,4 +69,62 @@ variable "replication_configurations" {
   }))
   description = "Replication configuration for a registry. See [Replication Configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_replication_configuration#replication-configuration)."
   default     = []
+}
+
+variable "lifecycle_rules" {
+  description = "Custom lifecycle rules to override or complement the default ones"
+  type = list(object({
+    priority    = number
+    description = optional(string)
+    selection = list(object({
+      tag_status       = string
+      count_type       = string
+      count_number     = number
+      count_unit       = optional(string)
+      tag_pattern_list = optional(list(string))
+      tag_prefix_list  = optional(list(string))
+    }))
+    action = object({
+      type = string
+    })
+  }))
+  default = [
+    {
+      priority    = 10
+      description = "Default lifecycle rule"
+      selection = [{
+        tag_status = "any"
+        count_type = "imageCountMoreThan"
+        # AWS limit https://docs.aws.amazon.com/AmazonECR/latest/userguide/service-quotas.html
+        count_number = 20000
+      }]
+      action = {
+        type = "expire"
+      }
+    }
+  ]
+
+  validation {
+    condition = alltrue(flatten([
+      for rule in var.lifecycle_rules :
+      [for selection in rule.selection :
+      contains(["tagged", "untagged", "any"], selection.tag_status)]
+    ]))
+    error_message = "Valid values for tag_status are: tagged, untagged, or any."
+  }
+  validation {
+    condition = alltrue(flatten([
+      for rule in var.lifecycle_rules :
+      [for selection in rule.selection :
+      contains(["imageCountMoreThan", "sinceImagePushed"], selection.count_type)]
+    ]))
+    error_message = "Valid values for count_type are: imageCountMoreThan or sinceImagePushed."
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.lifecycle_rules :
+      contains(["expire"], rule.action.type)
+    ])
+    error_message = "Valid values for action.type are: expire."
+  }
 }
