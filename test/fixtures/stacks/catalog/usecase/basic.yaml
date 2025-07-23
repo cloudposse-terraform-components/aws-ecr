@@ -6,18 +6,12 @@ components:
       vars:
         # Set `ecr_user_enabled: true` when this issue would be resolved
         # https://github.com/cloudposse-terraform-components/aws-ecr/issues/18
+        enabled: true
         ecr_user_enabled: false
-        enable_lifecycle_policy: true
-        max_image_count: 500
         scan_images_on_push: true
-        protected_tags:
-          - prod
+        enable_lifecycle_policy: true
         image_tag_mutability: IMMUTABLE
-        images:
-          - infrastructure
-          - microservice-a
-          - microservice-b
-          - microservice-c
+        repository_name: infrastructure
         read_write_account_role_map: {}
           # identity:
           #   - admin

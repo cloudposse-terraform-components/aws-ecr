@@ -1,0 +1,23 @@
+imports:
+  - catalog/usecase/basic
+
+components:
+  terraform:
+    ecr/microservice-a:
+      metadata:
+        component: ecr
+        inherits:
+          - ecr/basic
+      vars:
+        repository_name: microservice-a
+        name: ecr-microservice-a
+        lifecycle_rules:
+          - priority: 10
+            description: "only keep 10 images"
+            selection:
+              - tag_status: any
+                count_type: imageCountMoreThan
+                # AWS limit https://docs.aws.amazon.com/AmazonECR/latest/userguide/service-quotas.html
+                count_number: 10
+            action:
+              type: expire
