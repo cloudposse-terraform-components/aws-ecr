@@ -12,10 +12,12 @@ import (
 )
 
 type LifecyclePolicyRuleSelection struct {
-	TagStatus     string   `json:"tagStatus"`
-	TagPrefixList []string `json:"tagPrefixList"`
-	CountType     string   `json:"countType"`
-	CountNumber   int      `json:"countNumber"`
+	TagStatus      string   `json:"tagStatus"`
+	TagPrefixList  []string `json:"tagPrefixList"`
+	TagPatternList []string `json:"tagPatternList"`
+	CountType      string   `json:"countType"`
+	CountNumber    int      `json:"countNumber"`
+	CountUnit      string   `json:"countUnit"`
 }
 
 type LifecyclePolicyRule struct {
@@ -105,7 +107,7 @@ func (s *ComponentSuite) TestBasic() {
 	}
 	assert.EqualValues(s.T(), expectedLifecyclePolicy, lifecyclePolicy)
 
-	s.DriftTest(component, stack, &inputs)
+	s.DriftTest(component, stack, nil)
 }
 
 func (s *ComponentSuite) TestMicroserviceA() {
@@ -136,29 +138,27 @@ func (s *ComponentSuite) TestMicroserviceA() {
 	lifecyclePolicyString := aws.GetECRRepoLifecyclePolicy(s.T(), awsRegion, repository)
 	lifecyclePolicy := LifecyclePolicy{}
 	json.Unmarshal([]byte(lifecyclePolicyString), &lifecyclePolicy)
-	
+
 	expectedLifecyclePolicy := LifecyclePolicy{
 		Rules: []LifecyclePolicyRule{
 			{
 				RulePriority: 10,
 				Description:  "only keep 10 images",
 				Selection: LifecyclePolicyRuleSelection{
-					TagStatus:     "any",
-					CountType:     "imageCountMoreThan",
-					CountNumber:   10,
+					TagStatus:   "any",
+					CountType:   "imageCountMoreThan",
+					CountNumber: 10,
 				},
 				Action: map[string]string{
 					"type": "expire",
 				},
-			}
+			},
 		},
 	}
 	assert.EqualValues(s.T(), expectedLifecyclePolicy, lifecyclePolicy)
 
-	s.DriftTest(component, stack, &inputs)
+	s.DriftTest(component, stack, nil)
 }
-
-
 
 func (s *ComponentSuite) TestMicroserviceB() {
 	const component = "ecr/microservice-b"
@@ -188,53 +188,6 @@ func (s *ComponentSuite) TestMicroserviceB() {
 	lifecyclePolicyString := aws.GetECRRepoLifecyclePolicy(s.T(), awsRegion, repository)
 	lifecyclePolicy := LifecyclePolicy{}
 	json.Unmarshal([]byte(lifecyclePolicyString), &lifecyclePolicy)
-	/**
-        lifecycle_rules:
-          - priority: 1
-            description: "only keep 10 images"
-            selection:
-              tag_status: tagged
-              tag_prefix_list: ["prod"]
-              count_type: imageCountMoreThan
-              count_number: 10
-            action:
-              type: expire
-          - priority: 10
-            description: "dev 10 rule"
-            selection:
-              tag_status: tagged
-              tag_prefix_list: ["dev"]
-              count_type: imageCountMoreThan
-              count_number: 10
-            action:
-              type: expire
-          - priority: 15
-            description: "dev 10 rule"
-            selection:
-              tag_status: tagged
-              tag_pattern_list: ["dev-*"]
-              count_type: imageCountMoreThan
-              count_number: 10
-            action:
-              type: expire
-          - priority: 20
-            description: "default rule"
-            selection:
-              tag_status: untagged
-              count_type: imageCountMoreThan
-              count_number: 10
-            action:
-              type: expire
-          - priority: 40
-            description: "Any tag rule"
-            selection:
-              tag_status: any
-              count_type: sinceImagePushed
-              count_unit: days
-              count_number: 10
-            action:
-              type: expire
-	*/
 	expectedLifecyclePolicy := LifecyclePolicy{
 		Rules: []LifecyclePolicyRule{
 			{
@@ -254,10 +207,10 @@ func (s *ComponentSuite) TestMicroserviceB() {
 				RulePriority: 10,
 				Description:  "dev 10 rule",
 				Selection: LifecyclePolicyRuleSelection{
-					TagStatus:   "tagged",
+					TagStatus:     "tagged",
 					TagPrefixList: []string{"dev"},
-					CountType:   "imageCountMoreThan",
-					CountNumber: 10,
+					CountType:     "imageCountMoreThan",
+					CountNumber:   10,
 				},
 				Action: map[string]string{
 					"type": "expire",
@@ -267,10 +220,10 @@ func (s *ComponentSuite) TestMicroserviceB() {
 				RulePriority: 15,
 				Description:  "dev 10 rule",
 				Selection: LifecyclePolicyRuleSelection{
-					TagStatus:   "tagged",
+					TagStatus:      "tagged",
 					TagPatternList: []string{"dev-*"},
-					CountType:   "imageCountMoreThan",
-					CountNumber: 10,
+					CountType:      "imageCountMoreThan",
+					CountNumber:    10,
 				},
 				Action: map[string]string{
 					"type": "expire",
@@ -305,7 +258,7 @@ func (s *ComponentSuite) TestMicroserviceB() {
 	}
 	assert.EqualValues(s.T(), expectedLifecyclePolicy, lifecyclePolicy)
 
-	s.DriftTest(component, stack, &inputs)
+	s.DriftTest(component, stack, nil)
 }
 
 func (s *ComponentSuite) TestEnabledFlag() {
