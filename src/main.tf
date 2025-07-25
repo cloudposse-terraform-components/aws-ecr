@@ -23,8 +23,8 @@ locals {
 }
 
 module "ecr" {
-  source = "cloudposse/ecr/aws"
-  # version = "0.42.2" #TODO
+  source  = "cloudposse/ecr/aws"
+  version = "0.43.0"
 
   protected_tags             = var.protected_tags
   enable_lifecycle_policy    = var.enable_lifecycle_policy
