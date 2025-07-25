@@ -27,6 +27,7 @@ module "ecr" {
   version = "0.43.0"
 
   protected_tags             = var.protected_tags
+  protected_tags_keep_count  = var.protected_tags_keep_count
   enable_lifecycle_policy    = var.enable_lifecycle_policy
   image_names                = var.images
   image_tag_mutability       = var.image_tag_mutability

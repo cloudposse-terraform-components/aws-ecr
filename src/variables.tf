@@ -48,6 +48,12 @@ variable "protected_tags" {
   default     = []
 }
 
+variable "protected_tags_keep_count" {
+  type        = number
+  description = "Number of Image versions to keep for protected tags"
+  default     = 999999
+}
+
 variable "enable_lifecycle_policy" {
   type        = bool
   description = "Enable/disable image lifecycle policy"
