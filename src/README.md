@@ -11,12 +11,18 @@ This component is responsible for provisioning repositories, lifecycle rules, an
 This utilizes
 [the roles-to-principals submodule](https://github.com/cloudposse/terraform-aws-components/tree/main/modules/account-map/modules/roles-to-principals)
 to assign accounts to various roles. It is also compatible with the
-[GitHub Actions IAM Role mixin](https://github.com/cloudposse/terraform-aws-components/blob/master/mixins/github-actions-iam-role/README-github-action-iam-role.md).
+[GitHub Actions IAM Role mixin](https://github.com/cloudposse-terraform-components/mixins/blob/main/src/mixins/github-actions-iam-role/README-github-action-iam-role.md).
+
+<details>
+  <summary>Warning (Older) regarding <code>eks-iam</code> component </summary>
 
 > [!WARNING]
 >
 > Older versions of our reference architecture have an`eks-iam` component that needs to be updated to provide sufficient
 > IAM roles to allow pods to pull from ECR repos
+
+</details>
+## Usage
 
 ## Usage
 
@@ -58,25 +64,11 @@ components:
           stage: ["*"]
 ```
 
-### Pull Through Cache
-
-To configure a pull through cache rule, you can use the `pull_through_cache_rules` input. Each rule requires a AWS Secrets Manager secret, by name, to be provided. The secret should contain the credentials to access the registry. The `registry` field is the registry to apply the rule to and is specific to the registry. For Docker Hub, the registry is `registry-1.docker.io`.
-
-```yaml
-components:
-  terraform:
-    ecr:
-      vars:
-        enabled: true
-...
-        pull_through_cache_rules:
-          dockerhub:
-            registry: "registry-1.docker.io"
-            secret: "ecr-pullthroughcache/dockerhub"
-```
-
 <!-- prettier-ignore-start -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- prettier-ignore-end -->
+
+
+<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
@@ -160,18 +152,21 @@ components:
 | <a name="output_ecr_user_name"></a> [ecr\_user\_name](#output\_ecr\_user\_name) | ECR user name |
 | <a name="output_ecr_user_unique_id"></a> [ecr\_user\_unique\_id](#output\_ecr\_user\_unique\_id) | ECR user unique ID assigned by AWS |
 | <a name="output_repository_host"></a> [repository\_host](#output\_repository\_host) | ECR repository name |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- prettier-ignore-end -->
+<!-- markdownlint-restore -->
 
-## Related
 
-- [Decide How to distribute Docker Images](https://docs.cloudposse.com/layers/software-delivery/design-decisions/decide-how-to-distribute-docker-images/)
-
-- [Decide on ECR Strategy](https://docs.cloudposse.com/layers/project/design-decisions/decide-on-ecr-strategy/)
 
 ## References
 
-- [cloudposse/terraform-aws-components](https://github.com/cloudposse/terraform-aws-components/tree/main/modules/ecr) -
-  Cloud Posse's upstream component
+
+- [Decide How to distribute Docker Images](https://docs.cloudposse.com/layers/software-delivery/design-decisions/decide-how-to-distribute-docker-images/) - 
+
+- [Decide on ECR Strategy](https://docs.cloudposse.com/layers/project/design-decisions/decide-on-ecr-strategy/) - 
+
+- [Cloud Posse's upstream component](https://github.com/cloudposse/terraform-aws-components/tree/main/modules/ecr) - 
+
+
+
 
 [<img src="https://cloudposse.com/logo-300x69.svg" height="32" align="right"/>](https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse-terraform-components/aws-ecr&utm_content=)
+
