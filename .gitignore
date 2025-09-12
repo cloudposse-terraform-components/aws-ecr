@@ -8,6 +8,7 @@ aws-assumed-role/
 .direnv
 .envrc
 .cache
+.atmos
 
 # Compiled and auto-generated files
 # Note that the leading "**/" appears necessary for Docker even if not for Git
@@ -19,7 +20,7 @@ aws-assumed-role/
 **/nohup.out
 **/*.tfstate
 **/*.tfstate.*
-**/planfilecd
+**/planfile
 **/*.planfile
 **/*.kubeconfig
 **/.terraform.lock.hcl
@@ -37,9 +38,6 @@ aws-assumed-role/
 **/.module/
 **/.helmfile/
 
-# We pull account-map from a remote repository in Github Actions
-# However, we want to locally to validate tflint
-account-map/
 
 # Draft or auto-saved version
 # Note that the leading "**/" appears necessary for Docker even if not for Git
