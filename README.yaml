@@ -28,7 +28,6 @@ usage: |-
   typically provisioned via the stack for the "artifact" account (typically `auto`, `artifact`, or `corp`) in the primary
   region.
 
-  ```yaml
   components:
     terraform:
       ecr:
@@ -39,7 +38,14 @@ usage: |-
           scan_images_on_push: true
           protected_tags:
             - prod
-          image_tag_mutability: MUTABLE
+          # Tag mutability supports: MUTABLE, IMMUTABLE, IMMUTABLE_WITH_EXCLUSION, MUTABLE_WITH_EXCLUSION
+          image_tag_mutability: IMMUTABLE_WITH_EXCLUSION
+          # When using *_WITH_EXCLUSION, specify exclusions to allow certain tags to be mutable
+          image_tag_mutability_exclusion_filter:
+            - filter: "latest"
+              filter_type: "WILDCARD"
+            - filter: "dev-"
+              filter_type: "WILDCARD"
 
           images:
             - infrastructure
