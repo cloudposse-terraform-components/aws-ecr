@@ -24,7 +24,7 @@ locals {
 
 module "ecr" {
   source  = "cloudposse/ecr/aws"
-  version = "0.44.0"
+  version = "1.0.0"
 
   protected_tags                   = var.protected_tags
   protected_tags_keep_count        = var.protected_tags_keep_count
