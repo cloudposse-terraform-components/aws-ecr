@@ -1,0 +1,25 @@
+components:
+  terraform:
+    ecr/immutability-exclusions:
+      metadata:
+        component: target
+      vars:
+        ecr_user_enabled: false
+        enable_lifecycle_policy: true
+        max_image_count: 500
+        scan_images_on_push: true
+        protected_tags:
+          - prod
+        image_tag_mutability: IMMUTABLE_WITH_EXCLUSION
+        image_tag_mutability_exclusion_filter:
+          - filter: "latest"
+            filter_type: "WILDCARD"
+          - filter: "dev-"
+            filter_type: "WILDCARD"
+        images:
+          - infrastructure
+          - microservice-a
+          - microservice-b
+          - microservice-c
+        read_write_account_role_map: {}
+        read_only_account_role_map: {}

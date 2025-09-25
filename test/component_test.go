@@ -20,6 +20,40 @@ type LifecyclePolicyRuleSelection struct {
     CountNumber   int      `json:"countNumber"`
 }
 
+func (s *ComponentSuite) TestImmutabilityExclusions() {
+    const component = "ecr/immutability-exclusions"
+    const stack = "default-test"
+    const awsRegion = "us-east-2"
+
+    suffix := strings.ToLower(random.UniqueId())
+
+    inputs := map[string]interface{}{
+        "images": []string{
+            fmt.Sprintf("infrastructure-%s", suffix),
+            fmt.Sprintf("microservice-a-%s", suffix),
+            fmt.Sprintf("microservice-b-%s", suffix),
+            fmt.Sprintf("microservice-c-%s", suffix),
+        },
+    }
+
+    defer s.DestroyAtmosComponent(s.T(), component, stack, &inputs)
+    options, _ := s.DeployAtmosComponent(s.T(), component, stack, &inputs)
+    assert.NotNil(s.T(), options)
+
+    arnMaps := map[string]string{}
+    atmos.OutputStruct(s.T(), options, "ecr_repo_arn_map", &arnMaps)
+
+    for name := range arnMaps {
+        repository := aws.GetECRRepo(s.T(), awsRegion, name)
+        // Assert new image tag mutability mode is applied
+        assert.EqualValues(s.T(), "IMMUTABLE_WITH_EXCLUSION", repository.ImageTagMutability)
+        // Existing expectations remain
+        assert.True(s.T(), repository.ImageScanningConfiguration.ScanOnPush)
+    }
+
+    s.DriftTest(component, stack, &inputs)
+}
+
 type LifecyclePolicyRule struct {
 	RulePriority int                          `json:"rulePriority"`
 	Description  string                       `json:"description"`
