@@ -21,9 +21,8 @@ to assign accounts to various roles. It is also compatible with the
 > Older versions of our reference architecture have an`eks-iam` component that needs to be updated to provide sufficient
 > IAM roles to allow pods to pull from ECR repos
 
-</details>
-## Usage
 
+</details>
 ## Usage
 
 **Stack Level**: Regional
@@ -33,6 +32,8 @@ it creates are globally accessible, but you may want to create ECRs in multiple 
 typically provisioned via the stack for the "artifact" account (typically `auto`, `artifact`, or `corp`) in the primary
 region.
 
+
+```yaml
 components:
   terraform:
     ecr:
