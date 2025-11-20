@@ -1,6 +1,6 @@
 variable "account_map_enabled" {
   type        = bool
-  description = "Enable the account map component"
+  description = "INFO: Temporary variable required for account-map deprication plan. Please do not change the value"
   default     = true
 }
 
@@ -13,7 +13,7 @@ variable "account_map" {
     aws_partition                 = optional(string, "aws")
     iam_role_arn_templates        = optional(map(string), {})
   })
-  description = "Map of account names (tenant-stage format) to account IDs. Used to verify we're targeting the correct AWS account. Optional attributes support component-specific functionality (e.g., audit_account_account_name for cloudtrail, root_account_account_name for aws-sso)."
+  description = "INFO: Temporary variable required for account-map deprication plan. Please do not change the value"
   default = {
     full_account_map              = {}
     audit_account_account_name    = ""
