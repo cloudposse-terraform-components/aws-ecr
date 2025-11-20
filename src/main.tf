@@ -83,7 +83,7 @@ data "aws_caller_identity" "current" {
 }
 
 resource "aws_ecr_registry_policy" "this" {
-  for_each = toset(local.enabled &&  length(var.pull_through_cache_rules) > 0 ? ["true"] : [])
+  for_each = toset(local.enabled && length(var.pull_through_cache_rules) > 0 ? ["true"] : [])
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
