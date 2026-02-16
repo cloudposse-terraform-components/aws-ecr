@@ -145,7 +145,7 @@ components:
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_ecr"></a> [ecr](#module\_ecr) | cloudposse/ecr/aws | 1.0.0 |
+| <a name="module_ecr"></a> [ecr](#module\_ecr) | cloudposse/ecr/aws | 1.0.1 |
 | <a name="module_full_access"></a> [full\_access](#module\_full\_access) | github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals | v1.536.1 |
 | <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | ../account-map/modules/iam-roles | n/a |
 | <a name="module_readonly_access"></a> [readonly\_access](#module\_readonly\_access) | github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals | v1.536.1 |
