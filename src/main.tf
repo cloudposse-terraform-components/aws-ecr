@@ -3,7 +3,7 @@ locals {
 }
 
 module "full_access" {
-  source = "github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals?ref=v1.536.1"
+  source = "github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals?ref=v1.537.1"
 
   role_map = var.read_write_account_role_map
 
@@ -18,7 +18,7 @@ module "full_access" {
 }
 
 module "readonly_access" {
-  source = "github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals?ref=v1.536.1"
+  source = "github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals?ref=v1.537.1"
 
   role_map = var.read_only_account_role_map
 
