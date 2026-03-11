@@ -98,7 +98,7 @@ resource "aws_ecr_registry_policy" "this" {
         Principal = {
           AWS = distinct(compact(concat(module.full_access.principals, module.readonly_access.principals, [local.ecr_user_arn])))
         }
-        Resource = format("arn:aws:ecr:%s:%s:repository/*", var.region, one(data.aws_caller_identity.current.*.account_id))
+        Resource = format("arn:aws:ecr:%s:%s:repository/*", var.region, one(data.aws_caller_identity.current[*].account_id))
       }
     ]
   })
