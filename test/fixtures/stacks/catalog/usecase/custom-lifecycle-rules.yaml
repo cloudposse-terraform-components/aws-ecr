@@ -1,0 +1,57 @@
+components:
+  terraform:
+    ecr/custom-lifecycle-rules:
+      metadata:
+        component: target
+      vars:
+        ecr_user_enabled: false
+        enable_lifecycle_policy: true
+        max_image_count: 500
+        scan_images_on_push: true
+        protected_tags: []
+        image_tag_mutability: MUTABLE
+        images:
+          - clifecycle-a
+          - clifecycle-b
+        read_write_account_role_map: {}
+        read_only_account_role_map: {}
+        custom_lifecycle_rules:
+          # Regression: https://github.com/cloudposse/terraform-aws-ecr/issues/158
+          # tagged + tagPatternList + expire, no storageClass. v1.0.1 rendered
+          # `"targetStorageClass":null` and `"storageClass":"standard"`, which
+          # ECR rejected with InvalidParameterException.
+          - description: "Keep only last 10 images tagged 'latest'"
+            selection:
+              tagStatus: tagged
+              tagPatternList:
+                - latest
+              countType: imageCountMoreThan
+              countNumber: 10
+            action:
+              type: expire
+          # Feature (v1.0.1): transition to archive storage class.
+          - description: "Archive tagged images older than 30 days"
+            selection:
+              tagStatus: tagged
+              tagPrefixList:
+                - v
+              countType: sinceImagePushed
+              countUnit: days
+              countNumber: 30
+            action:
+              type: transition
+              targetStorageClass: archive
+          # Feature (v1.0.1 + v1.0.2): expire from archive storage class. ECR
+          # only accepts countType=sinceImageTransitioned when
+          # selection.storageClass=archive, and enforces a 90-day minimum.
+          - description: "Expire images that have been archived for more than 90 days"
+            selection:
+              tagStatus: tagged
+              tagPrefixList:
+                - v
+              storageClass: archive
+              countType: sinceImageTransitioned
+              countUnit: days
+              countNumber: 90
+            action:
+              type: expire
