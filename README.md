@@ -315,7 +315,7 @@ Under the hood, tests are powered by Terratest together with our internal [Test 
 
 Setup dependencies:
 - Install Atmos ([installation guide](https://atmos.tools/install/))
-- Install Go [1.24+ or newer](https://go.dev/doc/install)
+- Install Go [1.26+ or newer](https://go.dev/doc/install)
 - Install Terraform or OpenTofu
 
 To run tests:
