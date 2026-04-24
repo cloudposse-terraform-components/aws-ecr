@@ -131,21 +131,21 @@ components:
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.8.0, < 7.0.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.8.0, < 7.0.0 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
-| <a name="module_ecr"></a> [ecr](#module\_ecr) | cloudposse/ecr/aws | 1.0.1 |
+| ---- | ------ | ------- |
+| <a name="module_ecr"></a> [ecr](#module\_ecr) | cloudposse/ecr/aws | 1.0.2 |
 | <a name="module_full_access"></a> [full\_access](#module\_full\_access) | github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals | v1.537.1 |
 | <a name="module_iam_roles"></a> [iam\_roles](#module\_iam\_roles) | ../account-map/modules/iam-roles | n/a |
 | <a name="module_readonly_access"></a> [readonly\_access](#module\_readonly\_access) | github.com/cloudposse-terraform-components/aws-account-map//src/modules/roles-to-principals | v1.537.1 |
@@ -154,7 +154,7 @@ components:
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_ecr_pull_through_cache_rule.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_pull_through_cache_rule) | resource |
 | [aws_ecr_registry_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_registry_policy) | resource |
 | [aws_iam_policy.ecr_user](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -167,13 +167,13 @@ components:
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_account_map"></a> [account\_map](#input\_account\_map) | INFO: Temporary variable required for account-map deprication plan. Please do not change the value | <pre>object({<br/>    full_account_map              = map(string)<br/>    audit_account_account_name    = optional(string, "")<br/>    root_account_account_name     = optional(string, "")<br/>    identity_account_account_name = optional(string, "")<br/>    aws_partition                 = optional(string, "aws")<br/>    iam_role_arn_templates        = optional(map(string), {})<br/>  })</pre> | <pre>{<br/>  "audit_account_account_name": "",<br/>  "aws_partition": "aws",<br/>  "full_account_map": {},<br/>  "iam_role_arn_templates": {},<br/>  "identity_account_account_name": "",<br/>  "root_account_account_name": ""<br/>}</pre> | no |
 | <a name="input_account_map_enabled"></a> [account\_map\_enabled](#input\_account\_map\_enabled) | INFO: Temporary variable required for account-map deprication plan. Please do not change the value | `bool` | `true` | no |
 | <a name="input_additional_tag_map"></a> [additional\_tag\_map](#input\_additional\_tag\_map) | Additional key-value pairs to add to each map in `tags_as_list_of_maps`. Not added to `tags` or `id`.<br/>This is for some rare cases where resources want additional configuration of tags<br/>and therefore take a list of maps with tag key, value, and additional configuration. | `map(string)` | `{}` | no |
 | <a name="input_attributes"></a> [attributes](#input\_attributes) | ID element. Additional attributes (e.g. `workers` or `cluster`) to add to `id`,<br/>in the order they appear in the list. New attributes are appended to the<br/>end of the list. The elements of the list are joined by the `delimiter`<br/>and treated as a single ID element. | `list(string)` | `[]` | no |
 | <a name="input_context"></a> [context](#input\_context) | Single object for setting entire context at once.<br/>See description of individual variables for details.<br/>Leave string and numeric variables as `null` to use default value.<br/>Individual variable settings (non-null) override settings in context object,<br/>except for attributes, tags, and additional\_tag\_map, which are merged. | `any` | <pre>{<br/>  "additional_tag_map": {},<br/>  "attributes": [],<br/>  "delimiter": null,<br/>  "descriptor_formats": {},<br/>  "enabled": true,<br/>  "environment": null,<br/>  "id_length_limit": null,<br/>  "label_key_case": null,<br/>  "label_order": [],<br/>  "label_value_case": null,<br/>  "labels_as_tags": [<br/>    "unset"<br/>  ],<br/>  "name": null,<br/>  "namespace": null,<br/>  "regex_replace_chars": null,<br/>  "stage": null,<br/>  "tags": {},<br/>  "tenant": null<br/>}</pre> | no |
-| <a name="input_custom_lifecycle_rules"></a> [custom\_lifecycle\_rules](#input\_custom\_lifecycle\_rules) | Custom lifecycle rules to override or complement the default ones | <pre>list(object({<br/>    description = optional(string)<br/>    selection = object({<br/>      tagStatus      = string<br/>      countType      = string<br/>      countNumber    = number<br/>      countUnit      = optional(string)<br/>      tagPrefixList  = optional(list(string))<br/>      tagPatternList = optional(list(string))<br/>    })<br/>    action = object({<br/>      type = string<br/>    })<br/>  }))</pre> | `[]` | no |
+| <a name="input_custom_lifecycle_rules"></a> [custom\_lifecycle\_rules](#input\_custom\_lifecycle\_rules) | Custom lifecycle rules to override or complement the default ones. Action type can be 'expire' or 'transition'. Use 'transition' with targetStorageClass='archive' to archive images instead of deleting them. StorageClass can be 'standard' or 'archive' and is omitted from the rendered policy when not set. | <pre>list(object({<br/>    description = optional(string)<br/>    selection = object({<br/>      tagStatus      = string<br/>      storageClass   = optional(string)<br/>      countType      = string<br/>      countNumber    = number<br/>      countUnit      = optional(string)<br/>      tagPrefixList  = optional(list(string))<br/>      tagPatternList = optional(list(string))<br/>    })<br/>    action = object({<br/>      type               = string<br/>      targetStorageClass = optional(string)<br/>    })<br/>  }))</pre> | `[]` | no |
 | <a name="input_default_lifecycle_rules_settings"></a> [default\_lifecycle\_rules\_settings](#input\_default\_lifecycle\_rules\_settings) | Default lifecycle rules settings | <pre>object({<br/>    untagged_image_rule = optional(object({<br/>      enabled = optional(bool, true)<br/>      }), {<br/>      enabled = true<br/>    })<br/>    remove_old_image_rule = optional(object({<br/>      enabled = optional(bool, true)<br/>      }), {<br/>      enabled = true<br/>    })<br/>  })</pre> | <pre>{<br/>  "remove_old_image_rule": {<br/>    "enabled": true<br/>  },<br/>  "untagged_image_rule": {<br/>    "enabled": true<br/>  }<br/>}</pre> | no |
 | <a name="input_delimiter"></a> [delimiter](#input\_delimiter) | Delimiter to be used between ID elements.<br/>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
 | <a name="input_descriptor_formats"></a> [descriptor\_formats](#input\_descriptor\_formats) | Describe additional descriptors to be output in the `descriptors` output map.<br/>Map of maps. Keys are names of descriptors. Values are maps of the form<br/>`{<br/>  format = string<br/>  labels = list(string)<br/>}`<br/>(Type is `any` so the map values can later be enhanced to provide additional options.)<br/>`format` is a Terraform format string to be passed to the `format()` function.<br/>`labels` is a list of labels, in order, to pass to `format()` function.<br/>Label values will be normalized before being passed to `format()` so they will be<br/>identical to how they appear in `id`.<br/>Default is `{}` (`descriptors` output will be empty). | `any` | `{}` | no |
@@ -209,7 +209,7 @@ components:
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_ecr_repo_arn_map"></a> [ecr\_repo\_arn\_map](#output\_ecr\_repo\_arn\_map) | Map of image names to ARNs |
 | <a name="output_ecr_repo_url_map"></a> [ecr\_repo\_url\_map](#output\_ecr\_repo\_url\_map) | Map of image names to URLs |
 | <a name="output_ecr_user_arn"></a> [ecr\_user\_arn](#output\_ecr\_user\_arn) | ECR user ARN |
@@ -315,7 +315,7 @@ Under the hood, tests are powered by Terratest together with our internal [Test 
 
 Setup dependencies:
 - Install Atmos ([installation guide](https://atmos.tools/install/))
-- Install Go [1.24+ or newer](https://go.dev/doc/install)
+- Install Go [1.26+ or newer](https://go.dev/doc/install)
 - Install Terraform or OpenTofu
 
 To run tests:

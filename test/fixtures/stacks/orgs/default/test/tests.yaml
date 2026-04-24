@@ -3,3 +3,4 @@ import:
   - catalog/usecase/basic
   - catalog/usecase/disabled
   - catalog/usecase/immutability-exclusions
+  - catalog/usecase/custom-lifecycle-rules

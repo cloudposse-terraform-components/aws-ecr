@@ -117,11 +117,12 @@ variable "replication_configurations" {
 }
 
 variable "custom_lifecycle_rules" {
-  description = "Custom lifecycle rules to override or complement the default ones"
+  description = "Custom lifecycle rules to override or complement the default ones. Action type can be 'expire' or 'transition'. Use 'transition' with targetStorageClass='archive' to archive images instead of deleting them. StorageClass can be 'standard' or 'archive' and is omitted from the rendered policy when not set."
   type = list(object({
     description = optional(string)
     selection = object({
       tagStatus      = string
+      storageClass   = optional(string)
       countType      = string
       countNumber    = number
       countUnit      = optional(string)
@@ -129,7 +130,8 @@ variable "custom_lifecycle_rules" {
       tagPatternList = optional(list(string))
     })
     action = object({
-      type = string
+      type               = string
+      targetStorageClass = optional(string)
     })
   }))
   default = []
@@ -156,20 +158,64 @@ variable "custom_lifecycle_rules" {
     ])
     error_message = "Valid values for tagStatus are: tagged, untagged, or any."
   }
+
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      contains(["imageCountMoreThan", "sinceImagePushed"], rule.selection.countType)
+      contains(["imageCountMoreThan", "sinceImagePushed", "sinceImageTransitioned"], rule.selection.countType)
     ])
-    error_message = "Valid values for countType are: imageCountMoreThan or sinceImagePushed."
+    error_message = "Valid values for countType are: imageCountMoreThan, sinceImagePushed, or sinceImageTransitioned."
   }
 
   validation {
     condition = alltrue([
       for rule in var.custom_lifecycle_rules :
-      rule.selection.countType != "sinceImagePushed" || rule.selection.countUnit != null
+      !contains(["sinceImagePushed", "sinceImageTransitioned"], rule.selection.countType) || rule.selection.countUnit != null
     ])
-    error_message = "For countType = 'sinceImagePushed', countUnit must be specified."
+    error_message = "For countType = 'sinceImagePushed' or 'sinceImageTransitioned', countUnit must be specified."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      contains(["expire", "transition"], rule.action.type)
+    ])
+    error_message = "Valid values for action.type are: expire or transition."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.action.type != "transition" || rule.action.targetStorageClass != null
+    ])
+    error_message = "For action.type = 'transition', targetStorageClass must be specified."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.storageClass == null || contains(["standard", "archive"], rule.selection.storageClass)
+    ])
+    error_message = "Valid values for storageClass are: standard or archive. Omit to not include storageClass in the rendered policy."
+  }
+
+  # ECR requires countType=sinceImageTransitioned when selection.storageClass=archive,
+  # and rejects that countType otherwise. Catch it here for a clearer error than
+  # ECR's 400 InvalidParameterException.
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.storageClass != "archive" || rule.selection.countType == "sinceImageTransitioned"
+    ])
+    error_message = "When selection.storageClass is 'archive', countType must be 'sinceImageTransitioned' (ECR does not allow imageCountMoreThan/sinceImagePushed with the archive storage class)."
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.custom_lifecycle_rules :
+      rule.selection.countType != "sinceImageTransitioned" || rule.selection.storageClass == "archive"
+    ])
+    error_message = "countType 'sinceImageTransitioned' is only valid when selection.storageClass is 'archive'."
   }
 }
 
